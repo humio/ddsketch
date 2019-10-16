@@ -5,6 +5,7 @@
 
 package com.datadoghq.sketch.ddsketch.mapping;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Objects;
  * extracting the floor value of the logarithm to the base 2 from the binary representations of floating-point values
  * and linearly interpolating the logarithm in-between.
  */
-public class LinearlyInterpolatedMapping implements IndexMapping {
+public class LinearlyInterpolatedMapping implements IndexMapping, Serializable {
 
     private final double relativeAccuracy;
     private final double multiplier;

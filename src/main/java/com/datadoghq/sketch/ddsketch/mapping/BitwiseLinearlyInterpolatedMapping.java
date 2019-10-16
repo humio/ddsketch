@@ -5,6 +5,7 @@
 
 package com.datadoghq.sketch.ddsketch.mapping;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -16,7 +17,7 @@ import java.util.Objects;
  * relative accuracies and will fall back to the largest possible one that is less than the requested accuracy (which
  * can be as low as half of it, in the worst case).
  */
-public class BitwiseLinearlyInterpolatedMapping implements IndexMapping {
+public class BitwiseLinearlyInterpolatedMapping implements IndexMapping, Serializable {
 
     private final int numSignificantBinaryDigits;
     private final int partialSignificandShift;

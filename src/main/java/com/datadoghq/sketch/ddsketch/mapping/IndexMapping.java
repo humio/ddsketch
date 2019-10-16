@@ -5,6 +5,8 @@
 
 package com.datadoghq.sketch.ddsketch.mapping;
 
+import java.io.Serializable;
+
 /**
  * A mapping between {@code double} values and {@code int} values that imposes relative guarantees on the composition
  * of {@link #value} and {@link #index}. Specifically, for any value {@code v} between {@link #minIndexableValue()}

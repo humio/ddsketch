@@ -5,6 +5,7 @@
 
 package com.datadoghq.sketch.ddsketch.mapping;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
@@ -12,7 +13,7 @@ import java.util.Objects;
  * requires the least number of indices to cover a given range of values. This is done by logarithmically mapping
  * floating-point values to integers.
  */
-public class LogarithmicMapping implements IndexMapping {
+public class LogarithmicMapping implements IndexMapping, Serializable {
 
     private final double relativeAccuracy;
     private final double logGamma;

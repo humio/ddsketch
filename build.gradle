@@ -56,7 +56,7 @@ publishing {
 
                 name = 'DDSketch'
                 description = 'A Fast and Fully-Mergeable Quantile Sketch with Relative-Error Guarantees.'
-                url = 'https://github.com/DataDog/sketches-java'
+                url = 'https://github.com/humio/ddsketch'
 
                 licenses {
                     license {

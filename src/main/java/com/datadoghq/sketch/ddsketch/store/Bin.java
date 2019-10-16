@@ -5,12 +5,13 @@
 
 package com.datadoghq.sketch.ddsketch.store;
 
+import java.io.Serializable;
 import java.util.Objects;
 
 /**
  * A pair of index and count.
  */
-public final class Bin {
+public final class Bin implements Serializable {
 
     private final int index;
     private final long count;

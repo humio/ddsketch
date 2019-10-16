@@ -15,6 +15,9 @@ import com.datadoghq.sketch.ddsketch.store.CollapsingHighestDenseStore;
 import com.datadoghq.sketch.ddsketch.store.CollapsingLowestDenseStore;
 import com.datadoghq.sketch.ddsketch.store.Store;
 import com.datadoghq.sketch.ddsketch.store.UnboundedSizeDenseStore;
+
+import java.io.IOException;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -28,28 +31,17 @@ import java.util.function.Supplier;
  * value is 100, the computed quantile value is guaranteed to be between 99 and 101. If the expected quantile value
  * is 1000, the computed quantile value is guaranteed to be between 990 and 1010.
  * <p>
- * {@code DDSketch} works by mapping floating-point input values to bins and counting the number of values for each
- * bin. The mapping to bins is handled by {@link IndexMapping}, while the underlying structure that keeps track of
- * bin counts is {@link Store}. {@link #memoryOptimal} constructs a sketch with a logarithmic index mapping, hence low
- * memory footprint, whereas {@link #fast} and {@link #balanced} offer faster ingestion speeds at the cost of
- * larger memory footprints. The size of the sketch can be upper-bounded by using collapsing stores. For instance,
- * {@link #memoryOptimalCollapsingLowest} is the version of {@code DDSketch} described in the paper, and also
- * implemented in <a href="https://github.com/DataDog/sketches-go/">Go</a>
- * and <a href="https://github.com/DataDog/sketches-py/">Python</a>
- * . It collapses lowest bins when the maximum number of buckets is reached. For using a specific
+ * It collapses lowest bins when the maximum number of buckets is reached. For using a specific
  * {@link IndexMapping} or a specific implementation of {@link Store}, the constructor can be used
  * ({@link #DDSketch(IndexMapping, Supplier)}).
  * <p>
- * The memory size of the sketch depends on the range that is covered by the input values: the larger that range, the
- * more bins are needed to keep track of the input values. As a rough estimate, if working on durations using
- * {@link #memoryOptimal} with a relative accuracy of 2%, about 2kB (275 bins) are needed to cover values between 1
- * millisecond and 1 minute, and about 6kB (802 bins) to cover values between 1 nanosecond and 1 day. The number of
- * bins that are maintained can be upper-bounded using collapsing stores (see for example
- * {@link #memoryOptimalCollapsingLowest} and {@link #memoryOptimalCollapsingHighest}).
+ * {@code DDSketch} works by mapping floating-point input values to bins and counting the number of values for each
+ * bin. The mapping to bins is handled by {@link IndexMapping}, while the underlying structure that keeps track of
+ * bin counts is {@link Store}.
  * <p>
  * Note that this implementation is not thread-safe.
  */
-public class DDSketch implements QuantileSketch<DDSketch> {
+public class DDSketch implements QuantileSketch<DDSketch>, Serializable {
 
     private final IndexMapping indexMapping;
     private final double minIndexedValue;
@@ -64,15 +56,16 @@ public class DDSketch implements QuantileSketch<DDSketch> {
      *
      * @param indexMapping the mapping between floating-point values and integer indices to be used by the sketch
      * @param storeSupplier the store constructor for keeping track of added values
-     * @see #balanced
-     * @see #balancedCollapsingLowest
-     * @see #balancedCollapsingHighest
-     * @see #fast
-     * @see #fastCollapsingLowest
-     * @see #fastCollapsingHighest
-     * @see #memoryOptimal
-     * @see #memoryOptimalCollapsingLowest
-     * @see #memoryOptimalCollapsingHighest
+     * @see DDSketchFactory#balanced
+     * @see DDSketchFactory#balanced
+     * @see DDSketchFactory#balancedCollapsingLowest
+     * @see DDSketchFactory#balancedCollapsingHighest
+     * @see DDSketchFactory#fast
+     * @see DDSketchFactory#fastCollapsingLowest
+     * @see DDSketchFactory#fastCollapsingHighest
+     * @see DDSketchFactory#memoryOptimal
+     * @see DDSketchFactory#memoryOptimalCollapsingLowest
+     * @see DDSketchFactory#memoryOptimalCollapsingHighest
      */
     public DDSketch(IndexMapping indexMapping, Supplier<Store> storeSupplier) {
         this(indexMapping, storeSupplier, 0);
@@ -85,15 +78,15 @@ public class DDSketch implements QuantileSketch<DDSketch> {
      * @param indexMapping the mapping between floating-point values and integer indices to be used by the sketch
      * @param storeSupplier the store constructor for keeping track of added values
      * @param minIndexedValue the least value that should be distinguished from zero
-     * @see #balanced
-     * @see #balancedCollapsingLowest
-     * @see #balancedCollapsingHighest
-     * @see #fast
-     * @see #fastCollapsingLowest
-     * @see #fastCollapsingHighest
-     * @see #memoryOptimal
-     * @see #memoryOptimalCollapsingLowest
-     * @see #memoryOptimalCollapsingHighest
+     * @see DDSketchFactory#balanced
+     * @see DDSketchFactory#balancedCollapsingLowest
+     * @see DDSketchFactory#balancedCollapsingHighest
+     * @see DDSketchFactory#fast
+     * @see DDSketchFactory#fastCollapsingLowest
+     * @see DDSketchFactory#fastCollapsingHighest
+     * @see DDSketchFactory#memoryOptimal
+     * @see DDSketchFactory#memoryOptimalCollapsingLowest
+     * @see DDSketchFactory#memoryOptimalCollapsingHighest
      */
     public DDSketch(IndexMapping indexMapping, Supplier<Store> storeSupplier, double minIndexedValue) {
         this.indexMapping = indexMapping;
@@ -264,143 +257,19 @@ public class DDSketch implements QuantileSketch<DDSketch> {
 
         return indexMapping.value(bin.getIndex());
     }
-
-    // Preset sketches
-
-    /**
-     * Constructs a balanced instance of {@code DDSketch}, with high ingestion speed and low memory footprint.
-     *
-     * @param relativeAccuracy the relative accuracy guaranteed by the sketch
-     * @return a balanced instance of {@code DDSketch}
-     */
-    public static DDSketch balanced(double relativeAccuracy) {
-        return new DDSketch(
-                new QuadraticallyInterpolatedMapping(relativeAccuracy),
-                UnboundedSizeDenseStore::new
-        );
+/*
+    // TODO(gburd): implement
+    public final void writeObject(Object obj)
+            throws IOException {
+        indexMapping.writeObject()
+        store.writeObject()
     }
 
-    /**
-     * Constructs a balanced instance of {@code DDSketch}, with high ingestion speed and low memory footprint, using
-     * a limited number of bins. When the maximum number of bins is reached, bins with lowest indices are collapsed,
-     * which causes the relative accuracy guarantee to be lost on lowest quantiles.
-     *
-     * @param relativeAccuracy the relative accuracy guaranteed by the sketch (for non-collapsed bins)
-     * @param maxNumBins the maximum number of bins to be maintained
-     * @return a balanced instance of {@code DDSketch} using a limited number of bins
-     */
-    public static DDSketch balancedCollapsingLowest(double relativeAccuracy, int maxNumBins) {
-        return new DDSketch(
-                new QuadraticallyInterpolatedMapping(relativeAccuracy),
-                () -> new CollapsingLowestDenseStore(maxNumBins)
-        );
+    // TODO(gburd): implement
+    public final Object readObject()
+            throws IOException,
+            ClassNotFoundException {
+        return null;
     }
-
-    /**
-     * Constructs a balanced instance of {@code DDSketch}, with high ingestion speed and low memory footprint,, using
-     * a limited number of bins. When the maximum number of bins is reached, bins with highest indices are collapsed,
-     * which causes the relative accuracy guarantee to be lost on highest quantiles.
-     *
-     * @param relativeAccuracy the relative accuracy guaranteed by the sketch (for non-collapsed bins)
-     * @param maxNumBins the maximum number of bins to be maintained
-     * @return a balanced instance of {@code DDSketch} using a limited number of bins
-     */
-    public static DDSketch balancedCollapsingHighest(double relativeAccuracy, int maxNumBins) {
-        return new DDSketch(
-                new QuadraticallyInterpolatedMapping(relativeAccuracy),
-                () -> new CollapsingHighestDenseStore(maxNumBins)
-        );
-    }
-
-    /**
-     * Constructs a fast instance of {@code DDSketch}, with optimized ingestion speed, at the cost of higher memory
-     * usage.
-     *
-     * @param relativeAccuracy the relative accuracy guaranteed by the sketch
-     * @return a fast instance of {@code DDSketch}
-     */
-    public static DDSketch fast(double relativeAccuracy) {
-        return new DDSketch(
-                new BitwiseLinearlyInterpolatedMapping(relativeAccuracy),
-                UnboundedSizeDenseStore::new
-        );
-    }
-
-    /**
-     * Constructs a fast instance of {@code DDSketch}, with optimized ingestion speed, at the cost of higher memory
-     * usage, using a limited number of bins. When the maximum number of bins is reached, bins with lowest indices
-     * are collapsed, which causes the relative accuracy guarantee to be lost on lowest quantiles.
-     *
-     * @param relativeAccuracy the relative accuracy guaranteed by the sketch (for non-collapsed bins)
-     * @param maxNumBins the maximum number of bins to be maintained
-     * @return a fast instance of {@code DDSketch} using a limited number of bins
-     */
-    public static DDSketch fastCollapsingLowest(double relativeAccuracy, int maxNumBins) {
-        return new DDSketch(
-                new BitwiseLinearlyInterpolatedMapping(relativeAccuracy),
-                () -> new CollapsingLowestDenseStore(maxNumBins)
-        );
-    }
-
-    /**
-     * Constructs a fast instance of {@code DDSketch}, with optimized ingestion speed, at the cost of higher memory
-     * usage, using a limited number of bins. When the maximum number of bins is reached, bins with highest indices
-     * are collapsed, which causes the relative accuracy guarantee to be lost on highest quantiles.
-     *
-     * @param relativeAccuracy the relative accuracy guaranteed by the sketch (for non-collapsed bins)
-     * @param maxNumBins the maximum number of bins to be maintained
-     * @return a fast instance of {@code DDSketch} using a limited number of bins
-     */
-    public static DDSketch fastCollapsingHighest(double relativeAccuracy, int maxNumBins) {
-        return new DDSketch(
-                new BitwiseLinearlyInterpolatedMapping(relativeAccuracy),
-                () -> new CollapsingHighestDenseStore(maxNumBins)
-        );
-    }
-
-    /**
-     * Constructs a memory-optimal instance of {@code DDSketch}, with optimized memory usage, at the cost of lower
-     * ingestion speed.
-     *
-     * @param relativeAccuracy the relative accuracy guaranteed by the sketch
-     * @return a memory-optimal instance of {@code DDSketch}
-     */
-    public static DDSketch memoryOptimal(double relativeAccuracy) {
-        return new DDSketch(
-                new LogarithmicMapping(relativeAccuracy),
-                UnboundedSizeDenseStore::new
-        );
-    }
-
-    /**
-     * Constructs a memory-optimal instance of {@code DDSketch}, with optimized memory usage, at the cost of lower
-     * ingestion speed, using a limited number of bins. When the maximum number of bins is reached, bins with lowest
-     * indices are collapsed, which causes the relative accuracy guarantee to be lost on lowest quantiles.
-     *
-     * @param relativeAccuracy the relative accuracy guaranteed by the sketch (for non-collapsed bins)
-     * @param maxNumBins the maximum number of bins to be maintained
-     * @return a memory-optimal instance of {@code DDSketch} using a limited number of bins
-     */
-    public static DDSketch memoryOptimalCollapsingLowest(double relativeAccuracy, int maxNumBins) {
-        return new DDSketch(
-                new LogarithmicMapping(relativeAccuracy),
-                () -> new CollapsingLowestDenseStore(maxNumBins)
-        );
-    }
-
-    /**
-     * Constructs a memory-optimal instance of {@code DDSketch}, with optimized memory usage, at the cost of lower
-     * ingestion speed, using a limited number of bins. When the maximum number of bins is reached, bins with highest
-     * indices are collapsed, which causes the relative accuracy guarantee to be lost on highest quantiles.
-     *
-     * @param relativeAccuracy the relative accuracy guaranteed by the sketch (for non-collapsed bins)
-     * @param maxNumBins the maximum number of bins to be maintained
-     * @return a memory-optimal instance of {@code DDSketch} using a limited number of bins
-     */
-    public static DDSketch memoryOptimalCollapsingHighest(double relativeAccuracy, int maxNumBins) {
-        return new DDSketch(
-                new LogarithmicMapping(relativeAccuracy),
-                () -> new CollapsingHighestDenseStore(maxNumBins)
-        );
-    }
+*/
 }

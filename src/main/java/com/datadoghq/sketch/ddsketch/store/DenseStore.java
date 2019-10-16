@@ -5,13 +5,14 @@
 
 package com.datadoghq.sketch.ddsketch.store;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public abstract class DenseStore implements Store {
+public abstract class DenseStore implements Store, Serializable {
 
     private static final int DEFAULT_ARRAY_LENGTH_GROWTH_INCREMENT = 64;
     private static final double DEFAULT_ARRAY_LENGTH_OVERHEAD_RATIO = 0.1;
@@ -239,7 +240,7 @@ public abstract class DenseStore implements Store {
     @Override
     public Iterator<Bin> getAscendingIterator() {
 
-        return new Iterator<>() {
+        return new Iterator<Bin>() {
 
             private int index = minIndex;
 
@@ -258,7 +259,7 @@ public abstract class DenseStore implements Store {
     @Override
     public Iterator<Bin> getDescendingIterator() {
 
-        return new Iterator<>() {
+        return new Iterator<Bin>() {
 
             private int index = maxIndex;
 

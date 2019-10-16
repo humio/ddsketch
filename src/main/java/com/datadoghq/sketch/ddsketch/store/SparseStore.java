@@ -5,13 +5,14 @@
 
 package com.datadoghq.sketch.ddsketch.store;
 
+import java.io.Serializable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 
-public class SparseStore implements Store {
+public class SparseStore implements Store, Serializable {
 
     private final NavigableMap<Integer, Long> bins;
 
@@ -76,7 +77,7 @@ public class SparseStore implements Store {
 
         final Iterator<Entry<Integer, Long>> iterator = bins.entrySet().iterator();
 
-        return new Iterator<>() {
+        return new Iterator<Bin>() {
             @Override
             public boolean hasNext() {
                 return iterator.hasNext();
