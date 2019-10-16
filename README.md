@@ -1,4 +1,4 @@
-# sketches-java
+# ddsketch (was/fork-of: DataDog/sketches-java)
 
 This repo contains Java implementations of the distributed quantile sketch algorithms `DDSketch` [1] and `GKArray` [2]. Both sketches are mergeable, meaning that multiple sketches from distributed systems can be combined in a central node.
 

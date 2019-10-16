@@ -1,3 +1,5 @@
+
+
 plugins {
     id 'java-library'
     id 'maven-publish'
@@ -14,7 +16,7 @@ dependencies {
 }
 
 group = 'com.datadoghq'
-version = '0.1.1-SNAPSHOT'
+version = '0.1.2-SNAPSHOT'
 
 sourceCompatibility = '12'
 targetCompatibility = '12'
@@ -30,14 +32,20 @@ task javadocJar(type: Jar) {
 }
 
 publishing {
+    repositories {
+        maven {
+            name = "GitHubPackages"
+            url = uri("https://maven.pkg.github.com/OWNER/REPOSITORY")
+            credentials {
+                username = project.findProperty("gpr.user") ?: System.getenv("GPR_USER")
+                password = project.findProperty("gpr.key") ?: System.getenv("GPR_API_KEY")
+            }
+        }
+    }
     publications {
-        mavenJava(MavenPublication) {
-
-            from components.java
-            artifact sourcesJar
-            artifact javadocJar
-
-            pom {
+        gpr(MavenPublication) {
+            from(components.java)
+           pom {
 
                 name = 'DDSketch'
                 description = 'A Fast and Fully-Mergeable Quantile Sketch with Relative-Error Guarantees.'
@@ -66,32 +74,19 @@ publishing {
                         organization = 'Datadog'
                         email = 'homin@datadoghq.com'
                     }
+		    developer {
+		        name = 'Gregory S. Burd'
+			organization = 'Humio'
+			email = 'gburd@humio.com'
+		    }
                 }
 
                 scm {
-                    connection = 'scm:git:git://github.com/DataDog/sketches-java.git'
-                    developerConnection = 'scm:git:ssh://github.com:DataDog/sketches-java.git'
-                    url = 'http://github.com/DataDog/sketches-java'
+                    connection = 'scm:git:git://github.com/humio/ddsketch.git'
+                    developerConnection = 'scm:git:ssh://github.com:humio/ddsketch.git'
+                    url = 'http://github.com/humio/ddsketch'
                 }
             }
         }
     }
-
-    repositories {
-        maven {
-
-            def releasesRepoUrl = 'https://oss.sonatype.org/service/local/staging/deploy/maven2'
-            def snapshotsRepoUrl = 'https://oss.sonatype.org/content/repositories/snapshots'
-            url = version.contains('SNAPSHOT') ? snapshotsRepoUrl : releasesRepoUrl
-
-            credentials {
-                username ossrhUsername
-                password ossrhPassword
-            }
-        }
-    }
-}
-
-signing {
-    sign publishing.publications.mavenJava
 }
