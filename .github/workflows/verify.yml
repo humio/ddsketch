@@ -9,7 +9,7 @@ jobs:
   build:
     strategy:
       matrix:
-        java: ['8', '11', '13']
+        java: ['11', '13']
     runs-on: ubuntu-latest
 
     steps:
@@ -18,5 +18,5 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: ${{ matrix.java }}.x
-      - name: Build with Maven on Java ${{ matrix.java }}
-        run: mvn -Dmaven.compiler.source=${{ matrix.java }} -Dmaven.compiler.target=${{ matrix.java}} verify
+      - name: Build with Gradle on Java ${{ matrix.java }}
+        run: ./gradlew -Dmaven.compiler.source=${{ matrix.java }} -Dmaven.compiler.target=${{ matrix.java}} assemble
