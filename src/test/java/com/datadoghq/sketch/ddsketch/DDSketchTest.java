@@ -77,7 +77,7 @@ abstract class DDSketchTest extends QuantileSketchTest<DDSketch> {
     void serializesSketch() {
         Random rng = new Random();
         Double percentiles[] = new Double[25];
-        DDSketch sketch = DDSketchFactory.balanced(0.1);
+        DDSketch sketch = DDSketch.balanced(0.1);
         String filename = "/tmp/ddsketch.ser";
 
         // The percentiles we'll test before/after serialization.
