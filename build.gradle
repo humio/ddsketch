@@ -38,6 +38,12 @@ tasks.test {
     useJUnitPlatform()
 }
 
+idea {
+    module {
+        jdkName = '11'
+    }
+}
+
 publishing {
     repositories {
         maven {
