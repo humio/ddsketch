@@ -13,6 +13,7 @@ import java.util.Objects;
  */
 public final class Bin implements Serializable {
 
+    private static final long serialVersionUID = -9205420147070466620L;
     private final int index;
     private final long count;
 

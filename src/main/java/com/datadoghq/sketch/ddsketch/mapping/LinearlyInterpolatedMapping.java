@@ -15,6 +15,7 @@ import java.util.Objects;
  */
 public class LinearlyInterpolatedMapping implements IndexMapping, Serializable {
 
+    private static final long serialVersionUID = 4259875404705551231L;
     private final double relativeAccuracy;
     private final double multiplier;
 

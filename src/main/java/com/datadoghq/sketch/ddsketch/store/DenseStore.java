@@ -14,6 +14,7 @@ import java.util.stream.Stream;
 
 public abstract class DenseStore implements Store, Serializable {
 
+    private static final long serialVersionUID = 6971447173285228955L;
     private static final int DEFAULT_ARRAY_LENGTH_GROWTH_INCREMENT = 64;
     private static final double DEFAULT_ARRAY_LENGTH_OVERHEAD_RATIO = 0.1;
 

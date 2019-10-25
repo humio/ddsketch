@@ -6,6 +6,8 @@
 package com.datadoghq.sketch.gk;
 
 import com.datadoghq.sketch.QuantileSketch;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -16,8 +18,9 @@ import java.util.NoSuchElementException;
  * An implementation of the <a href="http://infolab.stanford.edu/~datar/courses/cs361a/papers/quantiles.pdf">quantile
  * sketch of Greenwald and Khanna</a>.
  */
-public class GKArray implements QuantileSketch<GKArray> {
+public class GKArray implements QuantileSketch<GKArray>, Serializable {
 
+    private static final long serialVersionUID = 1097035112428627113L;
     private final double rankAccuracy;
 
     private ArrayList<Entry> entries;

@@ -5,7 +5,11 @@
 
 package com.datadoghq.sketch.ddsketch.store;
 
-public class CollapsingHighestDenseStore extends CollapsingDenseStore {
+import java.io.Serializable;
+
+public class CollapsingHighestDenseStore extends CollapsingDenseStore implements Serializable {
+
+    private static final long serialVersionUID = -649511523436029587L;
 
     public CollapsingHighestDenseStore(int maxNumBins) {
         super(maxNumBins);

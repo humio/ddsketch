@@ -15,6 +15,8 @@ import com.datadoghq.sketch.ddsketch.store.CollapsingHighestDenseStore;
 import com.datadoghq.sketch.ddsketch.store.CollapsingLowestDenseStore;
 import com.datadoghq.sketch.ddsketch.store.Store;
 import com.datadoghq.sketch.ddsketch.store.UnboundedSizeDenseStore;
+
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -49,7 +51,8 @@ import java.util.function.Supplier;
  * <p>
  * Note that this implementation is not thread-safe.
  */
-public class DDSketch implements QuantileSketch<DDSketch> {
+public class DDSketch implements QuantileSketch<DDSketch>, Serializable {
+    private static final long serialVersionUID = 1907698505294341100L;
 
     private final IndexMapping indexMapping;
     private final double minIndexedValue;

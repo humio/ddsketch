@@ -15,6 +15,7 @@ import java.util.Objects;
  */
 public class QuadraticallyInterpolatedMapping implements IndexMapping, Serializable {
 
+    private static final long serialVersionUID = 5808706561578372368L;
     private final double relativeAccuracy;
     private final double multiplier;
 

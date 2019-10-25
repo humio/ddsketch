@@ -19,6 +19,7 @@ import java.util.Objects;
  */
 public class BitwiseLinearlyInterpolatedMapping implements IndexMapping, Serializable {
 
+    private static final long serialVersionUID = 977465041539857331L;
     private final int numSignificantBinaryDigits;
     private final int partialSignificandShift;
     private final int multiplier;

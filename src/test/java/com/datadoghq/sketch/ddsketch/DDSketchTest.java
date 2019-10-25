@@ -78,34 +78,34 @@ abstract class DDSketchTest extends QuantileSketchTest<DDSketch> {
         Random rng = new Random();
         Double percentiles[] = new Double[25];
         DDSketch sketch = DDSketch.balanced(0.1);
-        String filename = "/tmp/ddsketch.ser";
 
         // The percentiles we'll test before/after serialization.
         for (int i = 0; i < 25; i++) {
-            final double rangeMin = 0.1;
-            final double rangeMax = 99.99999999;
+            final double rangeMin = .01;
+            final double rangeMax = .99;
             percentiles[i] = rangeMin + (rangeMax - rangeMin) * rng.nextDouble();
         }
         Arrays.sort(percentiles);
 
         // Some random data to initialize the sketch.
-        for (int i = 0; i < 100; i++) {
-            final double rangeMin = 0.000000001;
-            final double rangeMax = 999999.99999999;
-            sketch.accept(rangeMin + (rangeMax - rangeMin) * rng.nextDouble());
+        for (int i = 0; i < 10000; i++) {
+            sketch.accept(rng.nextDouble());
         }
+        sketch.accept(0.0);
 
         // Serialization
+        byte[] data = new byte[0];
         try {
             //Saving of object in a file
-            FileOutputStream file = new FileOutputStream(filename);
-            ObjectOutputStream out = new ObjectOutputStream(file);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            ObjectOutputStream oos = new ObjectOutputStream(baos);
 
             // Method for serialization of object
-            out.writeObject(sketch);
+            oos.writeObject(sketch);
 
-            out.close();
-            file.close();
+            oos.close();
+            data = baos.toByteArray();
+            baos.close();
 
             System.out.println("Object has been serialized");
         } catch(IOException ex) {
@@ -118,14 +118,14 @@ abstract class DDSketchTest extends QuantileSketchTest<DDSketch> {
         // Deserialization
         try {
             // Reading the object from a file
-            FileInputStream file = new FileInputStream(filename);
-            ObjectInputStream in = new ObjectInputStream(file);
+            ByteArrayInputStream bais = new ByteArrayInputStream(data);
+            ObjectInputStream ois = new ObjectInputStream(bais);
 
             // Method for deserialization of object
-            sketch2 = (DDSketch)in.readObject();
+            sketch2 = (DDSketch)ois.readObject();
 
-            in.close();
-            file.close();
+            ois.close();
+            bais.close();
 
             System.out.println("Object has been deserialized ");
         } catch(IOException ex) {
@@ -134,6 +134,9 @@ abstract class DDSketchTest extends QuantileSketchTest<DDSketch> {
             System.out.println("ClassNotFoundException is caught");
         }
 
+        for (Double percentile : percentiles) {
+            assert(sketch.getValueAtQuantile(percentile) == sketch2.getValueAtQuantile(percentile));
+        }
     }
 
     static class DDSketchTest1 extends DDSketchTest {

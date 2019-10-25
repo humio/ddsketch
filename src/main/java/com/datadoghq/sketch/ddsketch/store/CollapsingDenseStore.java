@@ -5,8 +5,11 @@
 
 package com.datadoghq.sketch.ddsketch.store;
 
-abstract class CollapsingDenseStore extends DenseStore {
+import java.io.Serializable;
 
+abstract class CollapsingDenseStore extends DenseStore implements Serializable {
+
+    private static final long serialVersionUID = 3392875841024915195L;
     private final int maxNumBins;
 
     boolean isCollapsed;

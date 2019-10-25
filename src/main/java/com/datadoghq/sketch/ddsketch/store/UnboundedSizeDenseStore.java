@@ -5,7 +5,11 @@
 
 package com.datadoghq.sketch.ddsketch.store;
 
-public class UnboundedSizeDenseStore extends DenseStore {
+import java.io.Serializable;
+
+public class UnboundedSizeDenseStore extends DenseStore implements Serializable {
+
+    private static final long serialVersionUID = -417295423787070977L;
 
     public UnboundedSizeDenseStore() {
         super();

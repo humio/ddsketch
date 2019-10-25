@@ -15,6 +15,7 @@ import java.util.Objects;
  */
 public class LogarithmicMapping implements IndexMapping, Serializable {
 
+    private static final long serialVersionUID = -1825262672662571954L;
     private final double relativeAccuracy;
     private final double logGamma;
 

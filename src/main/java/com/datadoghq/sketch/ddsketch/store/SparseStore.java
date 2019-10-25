@@ -14,6 +14,7 @@ import java.util.TreeMap;
 
 public class SparseStore implements Store, Serializable {
 
+    private static final long serialVersionUID = -3013596372068981642L;
     private final NavigableMap<Integer, Long> bins;
 
     public SparseStore() {
